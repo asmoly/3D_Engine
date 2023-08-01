@@ -67,6 +67,10 @@
         "stop_token": "cpp",
         "thread": "cpp",
         "list": "cpp",
-        "functional": "cpp"
-    }
+        "functional": "cpp",
+        "cstdarg": "cpp",
+        "unordered_map": "cpp",
+        "xhash": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "enabled"
 }

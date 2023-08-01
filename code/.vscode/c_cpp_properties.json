@@ -6,7 +6,8 @@
                 "${workspaceFolder}",
                 "${workspaceFolder}\\include",
                 "${workspaceFolder}\\external\\GLFW\\include",
-                "${workspaceFolder}\\external\\GLEW\\include"
+                "${workspaceFolder}\\external\\GLEW\\include",
+                "${workspaceFolder}\\external\\GLM\\"
             ],
             "defines": [
                 "_DEBUG",
