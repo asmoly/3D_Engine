@@ -22,6 +22,11 @@ void main(void)
 
         vec3 N = normalize(cross(edge1, edge2));
 
+        if (dot(vec3(0.0, 0.0, -1.0), N) > 0)
+        {
+            return;
+        }
+
         gl_Position = gl_in[i].gl_Position;
         normal = N;
         EmitVertex();

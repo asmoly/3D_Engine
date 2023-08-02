@@ -17,9 +17,21 @@
 int main(void)
 {
     const int screenWidth = 1000;
-    const int screenHeight = 600;
+    const int screenHeight = 1000;
 
-    Matrix projectionMatrix = Matrix::create_projection_matrix(45.0f, screenWidth/screenHeight, 0.1f, 200.0f);
+    Mesh mesh;
+    mesh.load_from_obj("models/monkey.obj");
+
+    Matrix modelTransform = Matrix::create_transform_matrix(0.0, 45.0, 0.0, 0.0, 0.0, -50.0);
+    Matrix projectionMatrix = Matrix::create_projection_matrix(45.0f, screenWidth/screenHeight, 0.1f, 10000.0f);
+
+    float* lights = new float[300];
+    int lightsCount = 0;
+
+    lights[0] = 30.0f;
+    lights[1] = -30.0f;
+    lights[2] = 0.0f;
+    lightsCount ++;
 
     GLFWwindow* window;
 
@@ -49,7 +61,7 @@ int main(void)
     unsigned int vertexCount = 4;
     float vertices[] = {-0.5f, -0.5f, -2.0f,  1.0f,
                         -0.5f,  0.5f, -2.0f,  1.0f,
-                         0.5f,  0.5f, -10.0f, 1.0f,
+                         0.5f,  0.5f, -2.0f, 1.0f,
                          0.5f, -0.5f, -2.0f,  1.0f};
 
     unsigned int indexCount = 6; 
@@ -65,26 +77,36 @@ int main(void)
     
     VertexArray va;
 
-    VertexBuffer vb(vertices, sizeof(float)*4*vertexCount);
+    VertexBuffer vb(mesh.vertices, sizeof(float)*mesh.vertexCount);
     VertexBufferLayout vertexBufferLayout;
     vertexBufferLayout.push(4);
     va.add_buffer(vb, vertexBufferLayout);
 
-    IndexBuffer ib(indices, indexCount);
+    IndexBuffer ib(mesh.indices, mesh.indexCount);
 
     va.unbind();
     shader.unbind();
     vb.unbind();
     ib.unbind();
 
+    glEnable(GL_DEPTH_TEST);
+
+    float rotation = 0.0f;
     while (!glfwWindowShouldClose(window))
     {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         renderer.clear();
 
-        // Binding shader
-        shader.set_unfirom_mat4(projectionMatrix, "projectionMatrix");
+        rotation += 0.5f;
+        modelTransform = Matrix::create_transform_matrix(0.0, rotation, 0.0, 0.0, 0.0, -10.0);
 
-        renderer.draw(va, ib, shader);
+        shader.set_uniform_mat4(projectionMatrix, "projectionMatrix", false);
+        shader.set_uniform_mat4(modelTransform, "modelTransform", true);
+        shader.set_uniform_int(lightsCount, "lightsCount");
+        shader.set_uniform_array(lights, 300, "lightSources");
+
+        renderer.draw(va, ib, shader, mesh.drawType);
 
         glfwSwapBuffers(window);
 

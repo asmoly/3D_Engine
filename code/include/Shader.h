@@ -15,7 +15,9 @@ public:
     void bind() const;
     void unbind() const;
 
-    void set_unfirom_mat4(const Matrix& matrix, const std::string& name);
+    void set_uniform_mat4(const Matrix& matrix, const std::string& name, const bool& transpose);
+    void set_uniform_array(float* array, const int& arrayLength, const std::string& name);
+    void set_uniform_int(const int& number, const std::string& name);
 
 private:
     unsigned int get_unfirom_location(const std::string& name);

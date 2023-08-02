@@ -87,9 +87,26 @@ void Shader::unbind() const
     glUseProgram(0);
 }
 
-void Shader::set_unfirom_mat4(const Matrix& matrix, const std::string& name)
+void Shader::set_uniform_mat4(const Matrix& matrix, const std::string& name, const bool& transpose)
 {
-    glUniformMatrix4fv(Shader::get_unfirom_location(name), 1, GL_FALSE, &matrix.data[0]);
+    if (transpose == false)
+    {
+        glUniformMatrix4fv(Shader::get_unfirom_location(name), 1, GL_FALSE, &matrix.data[0]);
+    }
+    else
+    {
+        glUniformMatrix4fv(Shader::get_unfirom_location(name), 1, GL_TRUE, &matrix.data[0]);
+    }
+}
+
+void Shader::set_uniform_array(float* array, const int& arrayLength, const std::string& name)
+{
+    glUniform1fv(Shader::get_unfirom_location(name), arrayLength, &array[0]);
+}
+
+void Shader::set_uniform_int(const int& number, const std::string& name)
+{
+    glUniform1i(Shader::get_unfirom_location(name), number);
 }
 
 unsigned int Shader::get_unfirom_location(const std::string& name)
@@ -102,7 +119,7 @@ unsigned int Shader::get_unfirom_location(const std::string& name)
     unsigned int location = glGetUniformLocation(this->id, name.c_str());
     if (location == -1)
     {
-        std::cout << "Unifrom " << name << " not found" << std::endl;
+        std::cout << "Uniform " << name << " not found" << std::endl;
     }
     else
     {

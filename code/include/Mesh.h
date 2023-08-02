@@ -1,17 +1,22 @@
 #pragma once
 
 #include <iostream>
+#include "VertexArray.h"
+#include "IndexBuffer.h"
 
 class Mesh
 {
 public:
-    Mesh() = default;
+    Mesh();
 
     void load_from_obj(const char* pathToFile);
+    void create_buffers();
+    void print();
 
 public:
     float* vertices;
-    int vertexCount;
+    unsigned int vertexCount;
     unsigned int* indices;
-    int indexCount;
+    unsigned int indexCount;
+    int drawType;
 };

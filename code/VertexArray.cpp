@@ -22,12 +22,12 @@ void VertexArray::add_buffer(const VertexBuffer& vb, const VertexBufferLayout& l
     bind();
     vb.bind();
     const auto& elements = layout.elements;
-    unsigned int offset = 0;
+    int64_t offset = 0;
     for (unsigned int i = 0; i < elements.size(); i++)
     {
         const auto& element = elements[i];
         glEnableVertexAttribArray(i);
-        glVertexAttribPointer(i, element.count, element.type, element.normalized, layout.stride, (const void*)offset);
+        glVertexAttribPointer(i, element.count, element.type, element.normalized, layout.stride, (const void*) offset);
         offset += element.count + sizeof(GL_FLOAT);
     }
 }
