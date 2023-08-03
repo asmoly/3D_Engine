@@ -6,6 +6,7 @@
 #include "VertexArray.h"
 #include "IndexBuffer.h"
 #include "Shader.h"
+#include "Mesh.h"
 
 class Renderer
 {

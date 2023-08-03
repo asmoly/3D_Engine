@@ -8,12 +8,14 @@ in vec4 FragPos[];
 out vec4 FragPosGeo;
 out vec3 normal;
 
+uniform vec3 cameraPos;
+
 void main(void)
 {
     for (int i = 0; i < 3; i++) {
-        vec3 A = gl_in[i].gl_Position.xyz;
-        vec3 B = gl_in[(i + 1) % 3].gl_Position.xyz;
-        vec3 C = gl_in[(i + 2) % 3].gl_Position.xyz;
+        vec3 A = FragPos[i].xyz;
+        vec3 B = FragPos[(i + 1) % 3].xyz;
+        vec3 C = FragPos[(i + 2) % 3].xyz;
 
         FragPosGeo = FragPos[i];
 
@@ -22,7 +24,8 @@ void main(void)
 
         vec3 N = normalize(cross(edge1, edge2));
 
-        if (dot(vec3(0.0, 0.0, -1.0), N) > 0)
+        vec3 vertexToCameraVec = cameraPos - A;
+        if (dot(vertexToCameraVec, N) < 0)
         {
             return;
         }

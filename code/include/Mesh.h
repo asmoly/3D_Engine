@@ -7,7 +7,7 @@
 class Mesh
 {
 public:
-    Mesh();
+    Mesh(const char* pathToFile);
 
     void load_from_obj(const char* pathToFile);
     void create_buffers();
@@ -16,7 +16,9 @@ public:
 public:
     float* vertices;
     unsigned int vertexCount;
+
     unsigned int* indices;
     unsigned int indexCount;
+
     int drawType;
 };

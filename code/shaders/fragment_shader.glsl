@@ -7,11 +7,10 @@ in vec3 normal;
 
 uniform int lightsCount;
 uniform float lightSources[300];
+uniform vec3 cameraPos;
 
 void main()
 {
-    vec3 cameraPos = vec3(0.0, 0.0, 0.0);
-
     float diffusedLighting = 0.0;
     float specularHighlight = 0.0;
     for (int i = 0; i < lightsCount; i += 3)
@@ -26,7 +25,14 @@ void main()
 
         vec3 lightReflectionVec = -pixelToLightVec + 2.0*dot(normal, pixelToLightVec)*normal;
         specularHighlight = dot(pixelToCameraVec, lightReflectionVec)*0.5;
+
+        if (specularHighlight < 0.0 || diffusedLighting <= 0)
+        {
+            specularHighlight = 0.0;
+        }
     }
 
-    color = vec4(0.0*diffusedLighting + specularHighlight, 0.2*diffusedLighting + specularHighlight, 0.8*diffusedLighting + specularHighlight, 1.0);
+    vec4 baseColor = vec4(0.5, 0.5, 0.5, 1.0);
+    color = baseColor*diffusedLighting + specularHighlight;
+    color.w = 1.0;
 }

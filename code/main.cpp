@@ -4,6 +4,8 @@
 #include <math.h>
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
+#include "SFML/System.hpp"
+#include "SFML/Window.hpp"
 
 #include "Matrix.h"
 #include "Vector.h"
@@ -13,14 +15,18 @@
 #include "VertexArray.h"
 #include "Shader.h"
 #include "Renderer.h"
+#include "Camera.h"
 
 int main(void)
 {
+    Mesh mesh("models/cube.obj");
+    //mesh.print();
+
     const int screenWidth = 1000;
     const int screenHeight = 1000;
 
-    Mesh mesh;
-    mesh.load_from_obj("models/monkey.obj");
+    Camera camera;
+    Matrix cameraTransform;
 
     Matrix modelTransform = Matrix::create_transform_matrix(0.0, 45.0, 0.0, 0.0, 0.0, -50.0);
     Matrix projectionMatrix = Matrix::create_projection_matrix(45.0f, screenWidth/screenHeight, 0.1f, 10000.0f);
@@ -28,8 +34,8 @@ int main(void)
     float* lights = new float[300];
     int lightsCount = 0;
 
-    lights[0] = 30.0f;
-    lights[1] = -30.0f;
+    lights[0] = 20.0f;
+    lights[1] = 20.0f;
     lights[2] = 0.0f;
     lightsCount ++;
 
@@ -58,53 +64,94 @@ int main(void)
         std::cout << "Error loading GLEW!" << std::endl;
     }
 
-    unsigned int vertexCount = 4;
-    float vertices[] = {-0.5f, -0.5f, -2.0f,  1.0f,
-                        -0.5f,  0.5f, -2.0f,  1.0f,
-                         0.5f,  0.5f, -2.0f, 1.0f,
-                         0.5f, -0.5f, -2.0f,  1.0f};
-
-    unsigned int indexCount = 6; 
-    unsigned int indices[] = {0, 1, 2,
-                              2, 3, 0};
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     Renderer renderer;
-
-    // Shader
     Shader shader("shaders/vertex_shader.glsl", "shaders/geometry_shader.glsl", "shaders/fragment_shader.glsl");
-
-    // Buffers
-    
-    VertexArray va;
 
     VertexBuffer vb(mesh.vertices, sizeof(float)*mesh.vertexCount);
     VertexBufferLayout vertexBufferLayout;
     vertexBufferLayout.push(4);
+
+    VertexArray va;
     va.add_buffer(vb, vertexBufferLayout);
 
-    IndexBuffer ib(mesh.indices, mesh.indexCount);
+    IndexBuffer ib = IndexBuffer(mesh.indices, mesh.indexCount);
 
     va.unbind();
-    shader.unbind();
     vb.unbind();
     ib.unbind();
+    shader.unbind();
 
     glEnable(GL_DEPTH_TEST);
 
     float rotation = 0.0f;
     while (!glfwWindowShouldClose(window))
     {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+        {
+            camera.x += -cosf((camera.yRotation*3.1415)/180.0)*0.08;
+            camera.z += sinf((camera.yRotation*3.1415)/180.0)*0.08;
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+        {
+            camera.x -= -cosf((camera.yRotation*3.1415)/180.0)*0.08;
+            camera.z -= sinf((camera.yRotation*3.1415)/180.0)*0.08;
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+        {
+            camera.x += -cosf(((camera.yRotation - 90.0)*3.1415)/180.0)*0.08;
+            camera.z += sinf(((camera.yRotation - 90.0)*3.1415)/180.0)*0.08;
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+        {
+            camera.x -= -cosf(((camera.yRotation - 90.0)*3.1415)/180.0)*0.08;
+            camera.z -= sinf(((camera.yRotation - 90.0)*3.1415)/180.0)*0.08;
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+        {
+            camera.y += 0.08;
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+        {
+            camera.y -= 0.08;
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+        {
+            camera.xRotation += 1.0;
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+        {
+            camera.xRotation -= 1.0;
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+        {
+            camera.yRotation += 1.0;
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+        {
+            camera.yRotation -= 1.0;
+        }
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         renderer.clear();
 
         rotation += 0.5f;
-        modelTransform = Matrix::create_transform_matrix(0.0, rotation, 0.0, 0.0, 0.0, -10.0);
+        modelTransform = Matrix::create_transform_matrix(0.0, 0.0, 0.0, 0.0, 0.0, -10.0);
+        cameraTransform = camera.get_camera_transformation();
 
         shader.set_uniform_mat4(projectionMatrix, "projectionMatrix", false);
         shader.set_uniform_mat4(modelTransform, "modelTransform", true);
+        shader.set_uniform_mat4(cameraTransform, "cameraTransform", true);
         shader.set_uniform_int(lightsCount, "lightsCount");
         shader.set_uniform_array(lights, 300, "lightSources");
+        shader.set_uniform_vec3(camera.x, camera.y, camera.z, "cameraPos");
 
         renderer.draw(va, ib, shader, mesh.drawType);
 

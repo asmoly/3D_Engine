@@ -109,14 +109,19 @@ void Shader::set_uniform_int(const int& number, const std::string& name)
     glUniform1i(Shader::get_unfirom_location(name), number);
 }
 
-unsigned int Shader::get_unfirom_location(const std::string& name)
+void Shader::set_uniform_vec3(const float& x, const float& y, const float& z, const std::string& name)
+{
+    glUniform3f(Shader::get_unfirom_location(name), x, y, z);
+}
+
+int Shader::get_unfirom_location(const std::string& name)
 {
     if (this->uniformLocationCache.find(name) != this->uniformLocationCache.end())
     {
         return this->uniformLocationCache[name];
     }
 
-    unsigned int location = glGetUniformLocation(this->id, name.c_str());
+    int location = glGetUniformLocation(this->id, name.c_str());
     if (location == -1)
     {
         std::cout << "Uniform " << name << " not found" << std::endl;
