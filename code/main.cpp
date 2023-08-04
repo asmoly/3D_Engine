@@ -20,7 +20,7 @@
 
 int main(void)
 {
-    Mesh mesh("models/helmet.obj");
+    Mesh mesh("models/lion.obj");
     //mesh.print();
 
     const int screenWidth = 1000;
@@ -75,13 +75,14 @@ int main(void)
     VertexBufferLayout vertexBufferLayout;
     vertexBufferLayout.push(4); 
     vertexBufferLayout.push(2);
+    vertexBufferLayout.push(3);
 
     VertexArray va;
     va.add_buffer(vb, vertexBufferLayout);
 
     IndexBuffer ib = IndexBuffer(mesh.indices, mesh.indexCount);
 
-    Texture texture("textures/helmet.png");
+    Texture texture("textures/lion.png");
     texture.load();
     texture.bind();
     va.unbind();
@@ -158,6 +159,7 @@ int main(void)
         shader.set_uniform_array(lights, 300, "lightSources");
         shader.set_uniform_vec3(camera.x, camera.y, camera.z, "cameraPos");
         shader.set_uniform_int(0, "textureUnit");
+        shader.set_uniform_int(0, "interpolateNormals");
 
         texture.bind();
 
