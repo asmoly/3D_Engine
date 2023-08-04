@@ -1,8 +1,10 @@
 #version 330 core
 
 layout (location = 0) in vec4 position;
+layout (location = 1) in vec2 textureCoord;
 
 out vec4 FragPos;
+out vec2 TextureCoord;
 
 uniform mat4 projectionMatrix;
 uniform mat4 modelTransform;
@@ -12,4 +14,6 @@ void main()
 {
     gl_Position = projectionMatrix*cameraTransform*modelTransform*position;
     FragPos = modelTransform*position;
+
+    TextureCoord = textureCoord;
 }

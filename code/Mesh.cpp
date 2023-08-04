@@ -15,17 +15,102 @@ Mesh::Mesh(const char* pathToFile)
     this->load_from_obj(pathToFile);
 }
 
+// void Mesh::load_from_obj(const char* pathToFile)
+// {
+//     this->drawType = GL_TRIANGLES;
+
+//     struct Vector3
+//     {
+//         float x, y, z;
+//     };
+
+//     std::vector<Vector3> fileVertices;
+//     std::vector<int> fileIndices;
+
+//     std::ifstream file(pathToFile);
+
+//     std::string line;
+//     while (std::getline(file, line))
+//     {
+//         std::stringstream ss(line);
+//         std::string type;
+//         ss >> type;
+
+//         if (type == "v")
+//         {
+//             Vector3 vertex;
+//             ss >> vertex.x >> vertex.y >> vertex.z;
+//             fileVertices.push_back(vertex);
+//         }
+//         else if (type == "f")
+//         {
+//             for (int i = 0; i < 3; i++)
+//             {
+//                 std::string element;
+//                 ss >> element;
+//                 std::replace(element.begin(), element.end(), '/', ' ');
+//                 std::stringstream elementStream(element);
+
+//                 std::string index;
+//                 std::string textureCoordIndex;
+//                 std::string normalIndex;
+
+//                 elementStream >> index >> textureCoordIndex >> normalIndex;
+
+//                 fileIndices.push_back(std::stoi(index));
+//             }
+//         }
+//     }
+
+//     file.close();
+
+//     this->vertexCount = 4*std::size(fileVertices);
+//     this->indexCount = 3*std::size(fileIndices);
+    
+//     this->vertices = new float[this->vertexCount];
+//     this->indices = new unsigned int[this->indexCount];
+
+//     int counter = 0;
+//     for (Vector3 i : fileVertices)
+//     {
+//         this->vertices[counter] = i.x;
+//         this->vertices[counter + 1] = i.y;
+//         this->vertices[counter + 2] = i.z;
+//         this->vertices[counter + 3] = 1.0;
+
+//         counter += 4;
+//     }
+
+//     counter = 0;
+//     for (int i : fileIndices)
+//     {
+//         this->indices[counter] = i - 1;
+
+//         counter += 1;
+//     }
+// }
+
+
 void Mesh::load_from_obj(const char* pathToFile)
 {
     this->drawType = GL_TRIANGLES;
 
-    struct Vector3
+    struct TextureCoord
     {
-        float x, y, z, textureCoordindex1, textureCoordindex2, textureCoordindex3;
+        float x = 0.0, y = 0.0;
     };
 
-    std::vector<Vector3> fileVertices;
-    std::vector<Vector3> fileIndices;
+    struct Vertex
+    {
+        float x, y, z;
+        TextureCoord textureCoord;
+        bool assigned = true;
+        int nextCopy = -1;
+    };
+
+    std::vector<Vertex> fileVertices;
+    std::vector<TextureCoord> fileTextureCoords;
+    std::vector<int> fileIndices;
 
     std::ifstream file(pathToFile);
 
@@ -38,75 +123,123 @@ void Mesh::load_from_obj(const char* pathToFile)
 
         if (type == "v")
         {
-            Vector3 vertex;
+            Vertex vertex;
             ss >> vertex.x >> vertex.y >> vertex.z;
+            vertex.assigned = false;
             fileVertices.push_back(vertex);
+        }
+        else if (type == "vt")
+        {
+            TextureCoord textureCoord;
+            ss >> textureCoord.x >> textureCoord.y;
+            fileTextureCoords.push_back(textureCoord);
         }
         else if (type == "f")
         {
-            Vector3 index;
+            for (int i = 0; i < 3; i++)
+            {
+                std::string element;
+                ss >> element;
+                std::replace(element.begin(), element.end(), '/', ' ');
+                std::stringstream elementStream(element);
 
-            std::string index1;
-            std::string index2;
-            std::string index3;
+                std::string indexAsStr;
+                std::string textureCoordIndexAsStr;
+                std::string normalIndexAsStr;
 
-            ss >> index1 >> index2 >> index3;
+                elementStream >> indexAsStr >> textureCoordIndexAsStr >> normalIndexAsStr;
 
-            int index1CharIndex = index1.find('/');
-            int index2CharIndex = index2.find('/');
-            int index3CharIndex = index3.find('/');
+                int index = std::stoi(indexAsStr) - 1;
+                int textureCoordIndex = std::stoi(textureCoordIndexAsStr) - 1;
+                int normalIndex = std::stoi(normalIndexAsStr) - 1;
 
-            index1 = index1.substr(0, index1CharIndex);
-            index2 = index2.substr(0, index2CharIndex);
-            index3 = index3.substr(0, index3CharIndex);
+                bool foundCoord = false;
+                int newIndex = index;
+                while (foundCoord == false)
+                {
+                    TextureCoord textureCoord = fileTextureCoords[textureCoordIndex];
 
-            index.x = std::stoi(index1);
-            index.y = std::stoi(index2);
-            index.z = std::stoi(index3);
+                    if (fileVertices[newIndex].assigned == false)
+                    {
+                        // set default vertex
+                        fileVertices[newIndex].textureCoord = textureCoord;
+                        fileVertices[newIndex].assigned = true;
 
-            fileIndices.push_back(index);
+                        // Found
+                        foundCoord = true;
+                        fileIndices.push_back(newIndex);
+                    }
+                    else if (fileVertices[newIndex].textureCoord.x == textureCoord.x && fileVertices[newIndex].textureCoord.y == textureCoord.y)
+                    {
+                        // Found
+                        foundCoord = true;
+                        fileIndices.push_back(newIndex);
+                    }
+                    else if (fileVertices[newIndex].nextCopy == -1)
+                    {
+                        // Create new copy
+                        Vertex newVertex;
+                        newVertex.textureCoord = textureCoord;
+
+                        newVertex.x = fileVertices[newIndex].x;
+                        newVertex.y = fileVertices[newIndex].y;
+                        newVertex.z = fileVertices[newIndex].z;
+                        fileVertices[newIndex].nextCopy = fileVertices.size();
+
+                        fileVertices.push_back(newVertex);
+                        fileIndices.push_back(fileVertices[newIndex].nextCopy);
+                        foundCoord = true;
+                        // Found
+                    }
+                    else
+                    {
+                        // Skip
+                        newIndex = fileVertices[newIndex].nextCopy;
+                        foundCoord = false;
+                    }
+                }
+            }
         }
     }
 
     file.close();
 
-    this->vertexCount = 4*std::size(fileVertices);
-    this->indexCount = 3*std::size(fileIndices);
+    this->vertexCount = (4 + 2)*std::size(fileVertices);
+    this->indexCount = std::size(fileIndices);
     
     this->vertices = new float[this->vertexCount];
     this->indices = new unsigned int[this->indexCount];
 
     int counter = 0;
-    for (Vector3 i : fileVertices)
+    for (Vertex i : fileVertices)
     {
         this->vertices[counter] = i.x;
         this->vertices[counter + 1] = i.y;
         this->vertices[counter + 2] = i.z;
         this->vertices[counter + 3] = 1.0;
+        this->vertices[counter + 4] = i.textureCoord.x;
+        this->vertices[counter + 5] = i.textureCoord.y;
 
-        counter += 4;
+        counter += (4 + 2);
     }
 
     counter = 0;
-    for (Vector3 i : fileIndices)
+    for (int i : fileIndices)
     {
-        this->indices[counter] = i.x - 1;
-        this->indices[counter + 1] = i.y - 1;
-        this->indices[counter + 2] = i.z - 1;
-
-        counter += 3;
+        this->indices[counter] = i;
+        counter += 1;
     }
 }
 
 void Mesh::print()
 {
-    std::cout << "Vertices: " << int(this->vertexCount/4.0) << std::endl;
-    for (int i = 0; i < this->vertexCount; i += 4)
+    std::cout << "Vertices: " << int(this->vertexCount/6.0) << std::endl;
+    for (int i = 0; i < this->vertexCount; i += 6)
     {
-        std::cout << "[" << this->vertices[i] << ", " << this->vertices[i + 1] << ", " << this->vertices[i + 2] << ", " << this->vertices[i + 3] << "]" << std::endl;
+        std::cout << "[" << this->vertices[i] << ", " << this->vertices[i + 1] << ", " << this->vertices[i + 2] << ", " << this->vertices[i + 3] << ", " << this->vertices[i + 4] << ", " << this->vertices[i + 5] << "]" << std::endl;
     }
 
-    std::cout << "\nIndices: " << int(this->indexCount) << std::endl;
+    std::cout << "\nIndices: " << int(this->indexCount/3.0) << std::endl;
     for (int i = 0; i < this->indexCount; i += 3)
     {
         std::cout << "[" << this->indices[i] << ", " << this->indices[i + 1] << ", " << this->indices[i + 2] <<  "]" << std::endl;

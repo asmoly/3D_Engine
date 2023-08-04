@@ -16,10 +16,11 @@
 #include "Shader.h"
 #include "Renderer.h"
 #include "Camera.h"
+#include "Texture.h"
 
 int main(void)
 {
-    Mesh mesh("models/cube.obj");
+    Mesh mesh("models/helmet.obj");
     //mesh.print();
 
     const int screenWidth = 1000;
@@ -72,13 +73,17 @@ int main(void)
 
     VertexBuffer vb(mesh.vertices, sizeof(float)*mesh.vertexCount);
     VertexBufferLayout vertexBufferLayout;
-    vertexBufferLayout.push(4);
+    vertexBufferLayout.push(4); 
+    vertexBufferLayout.push(2);
 
     VertexArray va;
     va.add_buffer(vb, vertexBufferLayout);
 
     IndexBuffer ib = IndexBuffer(mesh.indices, mesh.indexCount);
 
+    Texture texture("textures/helmet.png");
+    texture.load();
+    texture.bind();
     va.unbind();
     vb.unbind();
     ib.unbind();
@@ -152,6 +157,9 @@ int main(void)
         shader.set_uniform_int(lightsCount, "lightsCount");
         shader.set_uniform_array(lights, 300, "lightSources");
         shader.set_uniform_vec3(camera.x, camera.y, camera.z, "cameraPos");
+        shader.set_uniform_int(0, "textureUnit");
+
+        texture.bind();
 
         renderer.draw(va, ib, shader, mesh.drawType);
 

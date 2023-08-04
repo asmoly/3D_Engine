@@ -3,14 +3,18 @@
 layout (location = 0) out vec4 color;
 
 in vec4 FragPosGeo;
+in vec2 TextureCoordGeo;
 in vec3 normal;
 
 uniform int lightsCount;
 uniform float lightSources[300];
 uniform vec3 cameraPos;
 
+uniform sampler2D textureUnit;
+
 void main()
 {
+    // Lighting code (not important for textures)
     float diffusedLighting = 0.0;
     float specularHighlight = 0.0;
     for (int i = 0; i < lightsCount; i += 3)
@@ -32,7 +36,11 @@ void main()
         }
     }
 
-    vec4 baseColor = vec4(0.5, 0.5, 0.5, 1.0);
+    // Texture code
+    vec4 baseColor = texture(textureUnit, TextureCoordGeo);
+
+    // baseColor = vec4(0.5, 0.5, 0.5, 1.0);
     color = baseColor*diffusedLighting + specularHighlight;
     color.w = 1.0;
+    //color = vec4(TextureCoordGeo.y, 0.0, 0.0, 1.0);
 }

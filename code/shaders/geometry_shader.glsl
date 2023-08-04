@@ -4,8 +4,10 @@ layout(triangles) in;
 layout(triangle_strip, max_vertices=3) out;
 
 in vec4 FragPos[];
+in vec2 TextureCoord[];
 
 out vec4 FragPosGeo;
+out vec2 TextureCoordGeo;
 out vec3 normal;
 
 uniform vec3 cameraPos;
@@ -18,6 +20,7 @@ void main(void)
         vec3 C = FragPos[(i + 2) % 3].xyz;
 
         FragPosGeo = FragPos[i];
+        TextureCoordGeo = TextureCoord[i];
 
         vec3 edge1 = B - A;
         vec3 edge2 = C - A;
