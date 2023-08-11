@@ -18,5 +18,5 @@ void main()
     FragPos = modelTransform*position;
 
     TextureCoord = textureCoord;
-    FragNormal = mat3(inverse(modelTransform))*normal;
+    FragNormal = mat3(transpose(inverse(modelTransform)))*normal;
 }

@@ -20,7 +20,7 @@
 
 int main(void)
 {
-    Mesh mesh("models/lion.obj");
+    Mesh mesh("models/city_block.obj");
     //mesh.print();
 
     const int screenWidth = 1000;
@@ -82,7 +82,7 @@ int main(void)
 
     IndexBuffer ib = IndexBuffer(mesh.indices, mesh.indexCount);
 
-    Texture texture("textures/lion.png");
+    Texture texture("textures/city_block.png");
     texture.load();
     texture.bind();
     va.unbind();
@@ -159,7 +159,7 @@ int main(void)
         shader.set_uniform_array(lights, 300, "lightSources");
         shader.set_uniform_vec3(camera.x, camera.y, camera.z, "cameraPos");
         shader.set_uniform_int(0, "textureUnit");
-        shader.set_uniform_int(0, "interpolateNormals");
+        shader.set_uniform_int(1, "interpolateNormals");
 
         texture.bind();
 
