@@ -20,7 +20,7 @@
 
 int main(void)
 {
-    Mesh mesh("models/city_block.obj");
+    Mesh mesh("models/lion.obj");
     //mesh.print();
 
     const int screenWidth = 1000;
@@ -51,7 +51,7 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(screenWidth, screenHeight, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(screenWidth, screenHeight, "3D Engine", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -82,7 +82,7 @@ int main(void)
 
     IndexBuffer ib = IndexBuffer(mesh.indices, mesh.indexCount);
 
-    Texture texture("textures/city_block.png");
+    Texture texture("textures/lion.png");
     texture.load();
     texture.bind();
     va.unbind();
@@ -159,7 +159,7 @@ int main(void)
         shader.set_uniform_array(lights, 300, "lightSources");
         shader.set_uniform_vec3(camera.x, camera.y, camera.z, "cameraPos");
         shader.set_uniform_int(0, "textureUnit");
-        shader.set_uniform_int(1, "interpolateNormals");
+        shader.set_uniform_int(0, "interpolateNormals");
 
         texture.bind();
 
