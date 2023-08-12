@@ -149,7 +149,7 @@ int main(void)
         renderer.clear();
 
         rotation += 0.5f;
-        modelTransform = Matrix::create_transform_matrix(0.0, 0.0, 0.0, 0.0, 0.0, -10.0);
+        modelTransform = Matrix::create_transform_matrix(0.0, 180, 0.0, 0.0, 0.0, -10.0);
         cameraTransform = camera.get_camera_transformation();
 
         shader.set_uniform_mat4(projectionMatrix, "projectionMatrix", false);
