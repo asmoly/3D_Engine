@@ -159,7 +159,7 @@ int main(void)
         shader.set_uniform_array(lights, 300, "lightSources");
         shader.set_uniform_vec3(camera.x, camera.y, camera.z, "cameraPos");
         shader.set_uniform_int(0, "textureUnit");
-        shader.set_uniform_int(0, "interpolateNormals");
+        shader.set_uniform_int(1, "interpolateNormals");
 
         texture.bind();
 
